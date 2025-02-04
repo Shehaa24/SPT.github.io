@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech to Text</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center horizontally */
+            justify-content: center; /* Center vertically */
+            min-height: 100vh; /* Ensure full viewport height */
+            margin: 0; /* Remove default margins */
+            padding: 20px; /* Add some padding */
+        }
+        #output, #arabic-output {
+            width: 80%; /* Adjust width as needed */
+            border: 1px solid gray;
+            padding: 10px;
+            margin-top: 20px;
+            overflow-wrap: break-word; /* Prevent text from overflowing */
+            min-height: 100px; /* Set a minimum height */
+        }
+
+        #start-button, #start-arabic-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #FFFFFF; /* White */
+            border: none;
+            color: black;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        #start-button:hover, #start-arabic-button:hover {
+            background-color: #45a049;
+        }
+
+        #logo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 100px; /* Adjust the size as needed */
+        }
+    </style>
+</head>
+<body>
+
+  <img id="logo" src="speech to text baseera (1).png" alt="Baseera Logo">
+
+  <h1>Speech to Text</h1>
+
+  <!-- English Speech to Text -->
+  <button id="start-button">Start Listening (English)</button>
+  <div id="output"></div>
+
+  <!-- Arabic Speech to Text -->
+  <button id="start-arabic-button">Start Listening (Arabic)</button>
+  <div id="arabic-output"></div>
+
+<script>
+    const output = document.getElementById('output');
+    const arabicOutput = document.getElementById('arabic-output');
+    const startButton = document.getElementById('start-button');
+    const startArabicButton = document.getElementById('start-arabic-button');
+    let recognitionEnglish, recognitionArabic;
+
+    // Check for Speech Recognition API support
+    if ('webkitSpeechRecognition' in window) {
+        recognitionEnglish = new webkitSpeechRecognition();
+        recognitionArabic = new webkitSpeechRecognition();
+    } else if ('SpeechRecognition' in window) {
+        recognitionEnglish = new SpeechRecognition();
+        recognitionArabic = new SpeechRecognition();
+    } else {
+        output.textContent = "Speech Recognition API not supported in this browser.";
+        arabicOutput.textContent = "Speech Recognition API not supported in this browser.";
+        startButton.disabled = true;
+        startArabicButton.disabled = true;
+    }
+
+    // Configure English Speech Recognition
+    if (recognitionEnglish) {
+        recognitionEnglish.continuous = true; // Keep listening
+        recognitionEnglish.interimResults = true; // Show partial results
+
+        recognitionEnglish.onresult = (event) => {
+            let interimTranscript = '';
+            let finalTranscript = '';
+
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+            }
+
+            output.textContent = finalTranscript + interimTranscript; // Display both
+        };
+
+        recognitionEnglish.onerror = (event) => {
+            console.error("Speech recognition error:", event.error);
+            output.textContent = "Error occurred during speech recognition. Check the console for more details.";
+        };
+
+        startButton.addEventListener('click', () => {
+            if (startButton.textContent === "Start Listening (English)") {
+                recognitionEnglish.start();
+                startButton.textContent = "Stop Listening (English)";
+            } else {
+                recognitionEnglish.stop();
+                startButton.textContent = "Start Listening (English)";
+            }
+        });
+    }
+
+    // Configure Arabic Speech Recognition
+    if (recognitionArabic) {
+        recognitionArabic.continuous = true; // Keep listening
+        recognitionArabic.interimResults = true; // Show partial results
+        recognitionArabic.lang = 'ar-EG'; // Set language to Arabic (Egypt)
+
+        recognitionArabic.onresult = (event) => {
+            let interimTranscript = '';
+            let finalTranscript = '';
+
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+            }
+
+            arabicOutput.textContent = finalTranscript + interimTranscript; // Display both
+        };
+
+        recognitionArabic.onerror = (event) => {
+            console.error("Speech recognition error:", event.error);
+            arabicOutput.textContent = "Error occurred during speech recognition. Check the console for more details.";
+        };
+
+        startArabicButton.addEventListener('click', () => {
+            if (startArabicButton.textContent === "Start Listening (Arabic)") {
+                recognitionArabic.start();
+                startArabicButton.textContent = "Stop Listening (Arabic)";
+            } else {
+                recognitionArabic.stop();
+                startArabicButton.textContent = "Start Listening (Arabic)";
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
